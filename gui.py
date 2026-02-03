@@ -86,8 +86,11 @@ class FlyBrainApp:
         ).pack(pady=15, anchor="nw", padx=20)
         
         # Search Bar
+        self.search_container = ctk.CTkFrame(self.sidebar, fg_color="transparent")
+        self.search_container.pack(fill="x", padx=10, pady=5)
+
         self.search_entry = ctk.CTkEntry(
-            self.sidebar, 
+            self.search_container, 
             placeholder_text="search experiment",
             fg_color="#FFDEDE",
             text_color="black",
@@ -95,9 +98,23 @@ class FlyBrainApp:
             height=35,
             corner_radius=20
         )
-        self.search_entry.pack(fill="x", padx=20, pady=5)
-        self.search_entry.bind("<KeyRelease>", lambda event: self.refresh_sidebar())
+        self.search_entry.pack(fill="x")
 
+        self.clear_search_btn = ctk.CTkButton(
+            self.search_entry, 
+            text="x", 
+            width=5, 
+            height=5,
+            corner_radius=2,
+            fg_color="transparent",
+            text_color="#B32442",
+            hover_color="#E289A3",
+            command=self.clear_search 
+        )
+        self.clear_search_btn.place(relx=0.95, rely=0.5, anchor="center")
+        self.clear_search_btn.place_forget()
+        self.search_entry.bind("<KeyRelease>", self.on_search_type)
+        
         # Experiment List Container 
         self.scroll_frame = ctk.CTkScrollableFrame(
             self.sidebar, 
@@ -159,6 +176,7 @@ class FlyBrainApp:
                 command=lambda n=folder: self.confirm_delete_modal(n)
             )
             trash.pack(side="right")
+
     def toggle_sidebar(self):
         if self.is_animating: return
         self.is_animating = True
@@ -185,6 +203,21 @@ class FlyBrainApp:
             time.sleep(0.005)
         self.sidebar_visible = True
         self.is_animating = False
+    
+    def on_search_type(self, event):
+        # Update the list
+        self.refresh_sidebar()
+        if len(self.search_entry.get()) > 0:
+            self.clear_search_btn.place(relx=0.93, rely=0.4, anchor="center")
+        else:
+            self.clear_search_btn.place_forget()
+
+    def clear_search(self):
+        self.search_entry.delete(0, 'end')
+        self.clear_search_btn.place_forget()
+        self.root.focus()
+        self.refresh_sidebar()
+
 # ---- SIDEBAR ------------------------------------------------------------------
 
 # ---- ADD EXPERIMENT -----------------------------------------------------------
