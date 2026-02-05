@@ -25,8 +25,8 @@ class AddExpModal(BaseModal):
         header.pack(fill="x", padx=40, pady=20)
         ctk.CTkLabel(header, text="Add New Experiment", text_color="#B32442", 
                      font=ctk.CTkFont(size=32, weight="bold")).pack(side="left")
-        ctk.CTkButton(header, text="X", width=40, height=40, corner_radius=20, 
-                      fg_color="transparent", text_color="#B32442", border_width=2,
+        ctk.CTkButton(header, text="X", width=20, height=20, corner_radius=10, 
+                      fg_color="transparent", text_color="#B32442", border_width=3,
                       border_color="#B32442", command=self.close).pack(side="right")
 
         # Inputs (Title, Drug, Remark)
@@ -73,12 +73,12 @@ class AddExpModal(BaseModal):
         return t
 
     def create_section(self, text):
-        ctk.CTkLabel(self, text=text, text_color="#E289A3", font=("Arial", 20, "bold")).pack(anchor="w", padx=60, pady=10)
+        ctk.CTkLabel(self, text=text, text_color="#B32442", font=("Arial", 20, "bold")).pack(anchor="w", padx=60, pady=10)
 
     def create_grid_input(self, master, label, col):
         f = ctk.CTkFrame(master, fg_color="transparent")
         f.grid(row=0, column=col, padx=(0, 20))
-        ctk.CTkLabel(f, text=label, text_color="#E289A3").pack(side="left")
+        ctk.CTkLabel(f, text=label, text_color="#B32442").pack(side="left")
         e = ctk.CTkEntry(f, width=80, fg_color="white", border_width=0)
         e.pack(side="left", padx=5)
         return e
