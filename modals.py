@@ -58,10 +58,11 @@ class AddExpModal(BaseModal):
                       width=300, corner_radius=15, command=self.handle_start).pack(pady=30)
 
     def save_to_excel(self, folder_path):
-        """Creates Excel with the requested template"""
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "Experiment Details"
+
+        title_value = self.title_e.get()
 
         # Template Data Mapping
         template_data = [
@@ -85,7 +86,9 @@ class AddExpModal(BaseModal):
             ws.cell(row=r_idx, column=1, value=label)
             ws.cell(row=r_idx, column=2, value=val)
 
-        wb.save(folder_path / "experiment_data.xlsx")
+        filename = f"experiment_data_{title_value}.xlsx"
+        wb.save(folder_path / filename)
+        
 
     def handle_start(self):
         title = self.title_e.get()
@@ -93,7 +96,7 @@ class AddExpModal(BaseModal):
             new_dir = self.exp_path_root / title
             new_dir.mkdir(exist_ok=True)
             self.save_to_excel(new_dir)
-            self.save_callback() # Refresh sidebar in gui.py
+            self.save_callback() 
             self.close()
 
     def create_input(self, text):
