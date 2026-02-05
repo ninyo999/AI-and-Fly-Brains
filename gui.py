@@ -223,8 +223,9 @@ class FlyBrainApp:
 # ---- SIDEBAR ------------------------------------------------------------------
 
     def open_add_modal(self):
-        # Call the OOP class from modals.py
-        AddExpModal(self.root, save_callback=self.save_logic)
+        AddExpModal(self.root, 
+                    save_callback=self.refresh_sidebar, 
+                    experiment_path_root=EXP_DIR)
 
     def save_logic(self, name):
         if name:
