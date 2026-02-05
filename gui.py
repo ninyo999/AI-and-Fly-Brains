@@ -1,9 +1,11 @@
 import os
 import time
 import customtkinter as ctk
+
 from pathlib import Path
 from tkinter import PhotoImage, messagebox
 from PIL import Image
+from modals import AddExpModal
 
 # Paths
 BASE_DIR = Path(__file__).parent
@@ -220,71 +222,15 @@ class FlyBrainApp:
 
 # ---- SIDEBAR ------------------------------------------------------------------
 
-# ---- ADD EXPERIMENT -----------------------------------------------------------
     def open_add_modal(self):
-        # Modal window
-        modal = ctk.CTkToplevel(self.root)
-        modal.geometry("600x600+350+100")
-        modal.overrideredirect(True)
-        modal.configure(fg_color="#E5E5E5", 
-                        border_color="#B32442",
-                        border_width=20,
-                        corner_radius=2)
-        modal.attributes("-topmost", True)
-    
-        self.dim = ctk.CTkToplevel(self.root)
-        self.dim.geometry(f"{self.root.winfo_width()}x{self.root.winfo_height()}+0+70")
-        self.dim.overrideredirect(True)
-        self.dim.configure(fg_color="black")
-        self.dim.attributes("-alpha", 0.5)
+        # Call the OOP class from modals.py
+        AddExpModal(self.root, save_callback=self.save_logic)
 
-        ctk.CTkLabel(
-            modal, 
-            text="Add New Experiment", 
-            text_color="#B32442", 
-            font=ctk.CTkFont(size=26, weight="bold")
-        ).pack(pady=20)
-
-        # Helper for Inputs
-        def create_input(label):
-            ctk.CTkLabel(modal, text=label, text_color="#B32442", font=ctk.CTkFont(weight="bold")).pack(anchor="w", padx=60)
-            entry = ctk.CTkEntry(modal, width=500, fg_color="white", text_color="black", corner_radius=10, border_width=0)
-            entry.pack(pady=(2, 15), ipady=5)
-            return entry
-
-        title_e = create_input("Title:")
-        drug_e = create_input("Drug use:")
-        
-        ctk.CTkLabel(modal, text="Remark:", text_color="#B32442", font=ctk.CTkFont(weight="bold")).pack(anchor="w", padx=60)
-        remark_e = ctk.CTkTextbox(modal, width=500, height=100, fg_color="white", text_color="black", corner_radius=10)
-        remark_e.pack(pady=5)
-
-        # Start Button
-        start_btn = ctk.CTkButton(
-            modal, 
-            text="Start Experiment", 
-            fg_color="#B32442", 
-            text_color="white",
-            font=ctk.CTkFont(size=18, weight="bold"),
-            height=45,
-            width=250,
-            corner_radius=25,
-            command=lambda: self.save_and_close(title_e.get(), modal)
-        )
-        start_btn.pack(pady=30)
-
-        def close():
-            modal.destroy()
-            self.dim.destroy()
-        ctk.CTkButton(modal, text="Cancel", fg_color="transparent", text_color="gray", hover_color = "black" , command=close).pack()
-
-    def save_and_close(self, name, modal):
+    def save_logic(self, name):
         if name:
             (EXP_DIR / name).mkdir(exist_ok=True)
             self.refresh_sidebar()
-            modal.destroy()
-            self.dim.destroy()
-
+    
     def confirm_delete_modal(self, folder_name):
         confirm_win = ctk.CTkToplevel(self.root)
         confirm_win.geometry("300x150+550+350") 
@@ -340,8 +286,7 @@ class FlyBrainApp:
             width=80, corner_radius=15, border_width=1, border_color="#B32442",
             hover_color="#FFDEDE", command=actual_delete
         ).pack(side="right", padx=10)
-        
-# ---- ADD EXPERIMENT -----------------------------------------------------------
+
 
 if __name__ == "__main__":
     app_root = ctk.CTk()
