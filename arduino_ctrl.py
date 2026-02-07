@@ -18,7 +18,18 @@ class ArduinoHandler:
 
     def send_led_data(self, data):
         if self.ser and self.ser.is_open:
-            # Protocol: D:duty,freq,time|O:duty,freq,len,delay
-            msg = (f"D:{data['dark_duty']},{data['dark_freq']},{data['dark_time']}|"
-                   f"O:{data['opto_duty']},{data['opto_freq']},{data['opto_len']},{data['opto_delay']}\n")
-            self.ser.write(msg.encode())
+            try:
+                clean_msg = ",".join([
+                    str(int(data.get('dark_duty', 0))),
+                    str(int(data.get('dark_freq', 0))),
+                    str(int(data.get('dark_time', 0))),
+                    str(int(data.get('opto_duty', 0))),
+                    str(int(data.get('opto_freq', 0))),
+                    str(int(data.get('opto_len', 0))),
+                    str(int(data.get('opto_delay', 0)))
+                ]) + "\n"
+                
+                self.ser.write(clean_msg.encode())
+                print(f"Sent to Arduino: {clean_msg.strip()}")
+            except ValueError:
+                print("Error: LED settings must be numbers.")
