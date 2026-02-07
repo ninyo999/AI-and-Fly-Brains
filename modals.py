@@ -101,7 +101,7 @@ class AddExpModal(BaseModal):
 
     def create_input(self, text):
         ctk.CTkLabel(self, text=text, text_color="#B32442", font=("Arial", 14, "bold")).pack(anchor="w", padx=60)
-        e = ctk.CTkEntry(self, width=780, fg_color="white", border_width=0, text_color="black")
+        e = ctk.CTkEntry(self, width=780, fg_color="white", border_width=0, text_color="black",)
         e.pack(pady=(2, 10))
         return e
 
@@ -112,12 +112,12 @@ class AddExpModal(BaseModal):
         return t
 
     def create_section(self, text):
-        ctk.CTkLabel(self, text=text, text_color="#E289A3", font=("Arial", 20, "bold")).pack(anchor="w", padx=60, pady=10)
+        ctk.CTkLabel(self, text=text, text_color="#B32442", font=("Arial", 20, "bold")).pack(anchor="w", padx=60, pady=10)
 
     def create_grid_input(self, master, label, col):
         f = ctk.CTkFrame(master, fg_color="transparent")
         f.grid(row=0, column=col, padx=(0, 20))
-        ctk.CTkLabel(f, text=label, text_color="#E289A3").pack(side="left")
+        ctk.CTkLabel(f, text=label, text_color="#B32442").pack(side="left")
         e = ctk.CTkEntry(f, width=80, fg_color="white", border_width=0, text_color="black")
         e.pack(side="left", padx=5)
         return e
