@@ -1,5 +1,6 @@
 import serial
 import serial.tools.list_ports
+import time
 
 class ArduinoHandler:
     def __init__(self, port=None, baudrate=9600):
@@ -19,17 +20,18 @@ class ArduinoHandler:
     def send_led_data(self, data):
         if self.ser and self.ser.is_open:
             try:
-                clean_msg = ",".join([
-                    str(int(data.get('dark_duty', 0))),
-                    str(int(data.get('dark_freq', 0))),
-                    str(int(data.get('dark_time', 0))),
-                    str(int(data.get('opto_duty', 0))),
-                    str(int(data.get('opto_freq', 0))),
-                    str(int(data.get('opto_len', 0))),
-                    str(int(data.get('opto_delay', 0)))
+                msg = ",".join([
+                    str(int(data.get('dark_duty', 60))),
+                    str(int(data.get('dark_freq', 500))), 
+                    str(int(data.get('dark_time', 40))),
+                    str(int(data.get('opto_duty', 100))),
+                    str(int(data.get('opto_freq', 500))),
+                    str(int(data.get('opto_len', 5))),
+                    str(int(data.get('opto_delay', 8)))
                 ]) + "\n"
                 
-                self.ser.write(clean_msg.encode())
-                print(f"Sent to Arduino: {clean_msg.strip()}")
-            except ValueError:
-                print("Error: LED settings must be numbers.")
+                self.ser.write(msg.encode())
+                print(f"Sent Experiment Data to Arduino: {msg.strip()}")
+                
+            except Exception as e:
+                print(f"Error sending to Arduino: {e}")
