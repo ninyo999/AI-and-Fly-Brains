@@ -1,5 +1,5 @@
-const int ledopto = 5;      // PWM capable pin
-const int leddarkfield = 7; // Digital pin (or PWM if supported)
+const int ledopto = 5;      
+const int leddarkfield = 7; 
 
 void setup() {
   Serial.begin(9600);
@@ -9,10 +9,9 @@ void setup() {
 
 void loop() {
   if (Serial.available() > 0) {
-    // Read the incoming line from Python
     String data = Serial.readStringUntil('\n');
     
-    // Parse the comma-separated values
+    // Parse the 7 values sent from Python
     int d_duty  = getValue(data, ',', 0);
     int d_freq  = getValue(data, ',', 1);
     int d_time  = getValue(data, ',', 2);
@@ -26,26 +25,26 @@ void loop() {
 }
 
 void runExperiment(int d_duty, int d_time, int o_duty, int o_len, int o_delay) {
-  // Start Darkfield (scaled 0-100 duty to 0-255 PWM)
+  // 1. Start Darkfield (scaled 0-100 to 0-255)
   analogWrite(leddarkfield, map(d_duty, 0, 100, 0, 255));
   
-  // Initial Delay for Opto
-  delay(o_delay);
+  // 2. Initial Delay before Opto starts
+  delay(o_delay * 1000); // Converting seconds to milliseconds
   
-  // Start Opto
+  // 3. Start Opto
   analogWrite(ledopto, map(o_duty, 0, 100, 0, 255));
-  delay(o_len);
-  analogWrite(ledopto, 0); // Turn off Opto after flash length
+  delay(o_len * 1000);
+  analogWrite(ledopto, 0); 
   
-  // Wait for the remainder of the darkfield active time
-  if (d_time > (o_delay + o_len)) {
-    delay(d_time - (o_delay + o_len));
+  // 4. Stay on for remainder of active time
+  int remaining = d_time - o_delay - o_len;
+  if (remaining > 0) {
+    delay(remaining * 1000);
   }
   
-  analogWrite(leddarkfield, 0); // Turn off Darkfield
+  analogWrite(leddarkfield, 0); 
 }
 
-// Helper function to split the string
 int getValue(String data, char separator, int index) {
   int found = 0;
   int strIndex[] = {0, -1};
