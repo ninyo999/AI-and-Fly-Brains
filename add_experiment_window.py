@@ -24,7 +24,7 @@ class AddExpModal(BaseModal):
         
         # UI Setup
         self.geometry("900x700+230+50")
-        self.configure(fg_color="#E5E5E5", corner_radius=30)
+        self.configure(fg_color="#E5E5E5", corner_radius=200)
         
         # Header Section
         header = ctk.CTkFrame(self, fg_color="transparent")
