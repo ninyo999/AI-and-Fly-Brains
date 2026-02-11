@@ -44,18 +44,18 @@ class AddExpModal(BaseModal):
         self.create_section("Dark field LEDs")
         df_frame = ctk.CTkFrame(self, fg_color="transparent")
         df_frame.pack(fill="x", padx=60)
-        self.d_duty = self.create_grid_input(df_frame, "duty cycle", 0, "60")
-        self.d_freq = self.create_grid_input(df_frame, "frequency", 1, "500")
-        self.d_time = self.create_grid_input(df_frame, "active time", 2, "40")
+        self.d_duty = self.create_grid_input(df_frame, "Duty Cycle(%)", 0, "60")
+        self.d_freq = self.create_grid_input(df_frame, "Frequency(Hz)", 1, "500")
+        self.d_time = self.create_grid_input(df_frame, "Active time(s)", 2, "40")
 
         # Optogenetic LEDs Section
         self.create_section("Optogenetic LEDs")
         op_frame = ctk.CTkFrame(self, fg_color="transparent")
         op_frame.pack(fill="x", padx=60)
-        self.o_duty = self.create_grid_input(op_frame, "duty cycle", 0, "100")
-        self.o_freq = self.create_grid_input(op_frame, "frequency", 1, "500")
-        self.o_len = self.create_grid_input(op_frame, "flash length", 2, "5")
-        self.o_delay = self.create_grid_input(op_frame, "initial delay", 3, "8")
+        self.o_duty = self.create_grid_input(op_frame, "Duty Cycle(%)", 0, "100")
+        self.o_freq = self.create_grid_input(op_frame, "Frequency(Hz)", 1, "500")
+        self.o_len = self.create_grid_input(op_frame, "Flash length(s)", 2, "5")
+        self.o_delay = self.create_grid_input(op_frame, "Initial delay(s)", 3, "8")
 
         # Start Button
         ctk.CTkButton(self, text="Start Experiment", fg_color="#B32442", height=50, 

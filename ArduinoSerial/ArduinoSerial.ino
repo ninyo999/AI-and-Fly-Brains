@@ -25,18 +25,18 @@ void loop() {
 }
 
 void runExperiment(int d_duty, int d_time, int o_duty, int o_len, int o_delay) {
-  // 1. Start Darkfield (scaled 0-100 to 0-255)
+  // Start Darkfield (scaled 0-100 to 0-255)
   analogWrite(leddarkfield, map(d_duty, 0, 100, 0, 255));
   
-  // 2. Initial Delay before Opto starts
+  // Initial Delay before Optogenetic starts
   delay(o_delay * 1000); // Converting seconds to milliseconds
   
-  // 3. Start Opto
+  // Start Optogenetics
   analogWrite(ledopto, map(o_duty, 0, 100, 0, 255));
   delay(o_len * 1000);
   analogWrite(ledopto, 0); 
   
-  // 4. Stay on for remainder of active time
+  // Stay on for remainder of active time
   int remaining = d_time - o_delay - o_len;
   if (remaining > 0) {
     delay(remaining * 1000);
