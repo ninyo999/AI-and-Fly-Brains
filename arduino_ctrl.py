@@ -1,20 +1,24 @@
 import serial
 import serial.tools.list_ports
 
-_PARAM_DEFAULTS = {
-    'dark_duty': 60, 'dark_freq': 500, 'dark_time': 40,
-    'opto_duty': 100, 'opto_freq': 500, 'opto_len': 5, 'opto_delay': 8,
+# Fixed PWM settings — not exposed to the user
+_PWM_DARK_DUTY  = 60
+_PWM_DARK_FREQ  = 500
+_PWM_OPTO_DUTY  = 100
+_PWM_OPTO_FREQ  = 500
+
+_DURATION_DEFAULTS = {
+    'baseline_duration': 40,
+    'opto_duration':      5,
+    'reaction_duration':  8,
 }
 
-_PARAM_RANGES = {
-    'dark_duty':  (0,   100),
-    'dark_freq':  (1,   100000),
-    'dark_time':  (0,   86400),
-    'opto_duty':  (0,   100),
-    'opto_freq':  (1,   100000),
-    'opto_len':   (0,   86400),
-    'opto_delay': (0,   86400),
+_DURATION_RANGES = {
+    'baseline_duration': (0, 86400),
+    'opto_duration':     (0, 86400),
+    'reaction_duration': (0, 86400),
 }
+
 
 class ArduinoHandler:
     def __init__(self, port=None, baudrate=9600):
@@ -39,9 +43,9 @@ class ArduinoHandler:
         except ValueError as e:
             print(f"Invalid serial port parameters: {e}")
 
-    def _parse_int(self, value, key):
-        default = _PARAM_DEFAULTS[key]
-        lo, hi = _PARAM_RANGES[key]
+    def _parse_duration(self, value, key):
+        default = _DURATION_DEFAULTS[key]
+        lo, hi = _DURATION_RANGES[key]
         try:
             result = int(str(value).strip())
         except (ValueError, TypeError):
@@ -58,14 +62,20 @@ class ArduinoHandler:
             print("Arduino not connected; skipping send.")
             return False
 
+        baseline = self._parse_duration(
+            data.get('baseline_duration', _DURATION_DEFAULTS['baseline_duration']),
+            'baseline_duration')
+        opto_dur = self._parse_duration(
+            data.get('opto_duration', _DURATION_DEFAULTS['opto_duration']),
+            'opto_duration')
+        reaction = self._parse_duration(
+            data.get('reaction_duration', _DURATION_DEFAULTS['reaction_duration']),
+            'reaction_duration')
+
+        # Message format: dark_duty,dark_freq,baseline,opto_duty,opto_freq,opto_duration,reaction
         fields = [
-            self._parse_int(data.get('dark_duty',  _PARAM_DEFAULTS['dark_duty']),  'dark_duty'),
-            self._parse_int(data.get('dark_freq',  _PARAM_DEFAULTS['dark_freq']),  'dark_freq'),
-            self._parse_int(data.get('dark_time',  _PARAM_DEFAULTS['dark_time']),  'dark_time'),
-            self._parse_int(data.get('opto_duty',  _PARAM_DEFAULTS['opto_duty']),  'opto_duty'),
-            self._parse_int(data.get('opto_freq',  _PARAM_DEFAULTS['opto_freq']),  'opto_freq'),
-            self._parse_int(data.get('opto_len',   _PARAM_DEFAULTS['opto_len']),   'opto_len'),
-            self._parse_int(data.get('opto_delay', _PARAM_DEFAULTS['opto_delay']), 'opto_delay'),
+            _PWM_DARK_DUTY, _PWM_DARK_FREQ, baseline,
+            _PWM_OPTO_DUTY, _PWM_OPTO_FREQ, opto_dur, reaction,
         ]
 
         msg = ",".join(str(f) for f in fields) + "\n"
