@@ -67,9 +67,9 @@ class AddExpModal(BaseModal):
         self.create_section("Experiment Durations")
         dur_frame = ctk.CTkFrame(self, fg_color="transparent")
         dur_frame.pack(fill="x", padx=60)
-        self.baseline_dur = self.create_grid_input(dur_frame, "Baseline (s)",     0, "40")
-        self.opto_dur     = self.create_grid_input(dur_frame, "Optogenetics (s)", 1, "5")
-        self.reaction_dur = self.create_grid_input(dur_frame, "Reaction (s)",     2, "8")
+        self.baseline_dur = self.create_grid_input(dur_frame, "Baseline (s)",     0, "10")
+        self.opto_dur     = self.create_grid_input(dur_frame, "Optogenetics (s)", 1, "10")
+        self.reaction_dur = self.create_grid_input(dur_frame, "Reaction (s)",     2, "15")
 
         # Start Button
         ctk.CTkButton(self, text="Start Experiment", fg_color="#B32442", height=50,
