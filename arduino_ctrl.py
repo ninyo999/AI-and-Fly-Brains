@@ -8,9 +8,9 @@ _PWM_OPTO_DUTY  = 100
 _PWM_OPTO_FREQ  = 500
 
 _DURATION_DEFAULTS = {
-    'baseline_duration': 40,
-    'opto_duration':      5,
-    'reaction_duration':  8,
+    'baseline_duration': 10,
+    'opto_duration':     10,
+    'reaction_duration': 15,
 }
 
 _DURATION_RANGES = {
