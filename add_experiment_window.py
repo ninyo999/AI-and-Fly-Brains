@@ -46,7 +46,7 @@ class AddExpModal(BaseModal):
         self.exp_path_root = Path(experiment_path_root)
 
         # UI Setup
-        self.geometry("900x700+230+50")
+        self.geometry("900x560+230+100")
         self.configure(fg_color="#E5E5E5", corner_radius=200)
 
         # Header Section
@@ -60,25 +60,16 @@ class AddExpModal(BaseModal):
 
         # Experiment Info Inputs
         self.title_e = self.create_input("Title:")
-        self.drug_e = self.create_input("Drug use:")
+        self.drug_e  = self.create_input("Drug use:")
         self.remark_e = self.create_textbox("Remark:")
 
-        # Dark field LEDs Section
-        self.create_section("Dark field LEDs")
-        df_frame = ctk.CTkFrame(self, fg_color="transparent")
-        df_frame.pack(fill="x", padx=60)
-        self.d_duty = self.create_grid_input(df_frame, "Duty Cycle(%)", 0, "60")
-        self.d_freq = self.create_grid_input(df_frame, "Frequency(Hz)", 1, "500")
-        self.d_time = self.create_grid_input(df_frame, "Active time(s)", 2, "40")
-
-        # Optogenetic LEDs Section
-        self.create_section("Optogenetic LEDs")
-        op_frame = ctk.CTkFrame(self, fg_color="transparent")
-        op_frame.pack(fill="x", padx=60)
-        self.o_duty = self.create_grid_input(op_frame, "Duty Cycle(%)", 0, "100")
-        self.o_freq = self.create_grid_input(op_frame, "Frequency(Hz)", 1, "500")
-        self.o_len = self.create_grid_input(op_frame, "Flash length(s)", 2, "5")
-        self.o_delay = self.create_grid_input(op_frame, "Initial delay(s)", 3, "8")
+        # Experiment Durations Section
+        self.create_section("Experiment Durations")
+        dur_frame = ctk.CTkFrame(self, fg_color="transparent")
+        dur_frame.pack(fill="x", padx=60)
+        self.baseline_dur = self.create_grid_input(dur_frame, "Baseline (s)",     0, "40")
+        self.opto_dur     = self.create_grid_input(dur_frame, "Optogenetics (s)", 1, "5")
+        self.reaction_dur = self.create_grid_input(dur_frame, "Reaction (s)",     2, "8")
 
         # Start Button
         ctk.CTkButton(self, text="Start Experiment", fg_color="#B32442", height=50,
@@ -94,20 +85,14 @@ class AddExpModal(BaseModal):
         ws.title = "Experiment Details"
 
         template_data = [
-            ("Title:", title_val),
+            ("Title:",    title_val),
             ("Drug use:", self.drug_e.get()),
-            ("Remark:", self.remark_e.get("1.0", "end-1c")),
+            ("Remark:",   self.remark_e.get("1.0", "end-1c")),
             ("", ""),
-            ("Dark field LEDs", ""),
-            ("duty cycle:", self.d_duty.get()),
-            ("frequency:", self.d_freq.get()),
-            ("active time:", self.d_time.get()),
-            ("", ""),
-            ("Optogenetic LEDs", ""),
-            ("duty cycle:", self.o_duty.get()),
-            ("frequency:", self.o_freq.get()),
-            ("flash length:", self.o_len.get()),
-            ("initial delay:", self.o_delay.get()),
+            ("Experiment Durations", ""),
+            ("Baseline (s):",     self.baseline_dur.get()),
+            ("Optogenetics (s):", self.opto_dur.get()),
+            ("Reaction (s):",     self.reaction_dur.get()),
         ]
 
         for r_idx, (label, val) in enumerate(template_data, start=1):
@@ -124,13 +109,9 @@ class AddExpModal(BaseModal):
 
     def _validate_inputs(self):
         checks = [
-            (self.d_duty.get(), "Dark Duty Cycle",    0,   100),
-            (self.d_freq.get(), "Dark Frequency",      1, 100000),
-            (self.d_time.get(), "Dark Active Time",    0,  86400),
-            (self.o_duty.get(), "Opto Duty Cycle",     0,   100),
-            (self.o_freq.get(), "Opto Frequency",      1, 100000),
-            (self.o_len.get(),  "Opto Flash Length",   0,  86400),
-            (self.o_delay.get(),"Opto Initial Delay",  0,  86400),
+            (self.baseline_dur.get(), "Baseline Duration",     0, 86400),
+            (self.opto_dur.get(),     "Optogenetics Duration", 0, 86400),
+            (self.reaction_dur.get(), "Reaction Duration",     0, 86400),
         ]
         errors = []
         for val, label, lo, hi in checks:
@@ -161,13 +142,9 @@ class AddExpModal(BaseModal):
             return
 
         led_data = {
-            'dark_duty':  self.d_duty.get(),
-            'dark_freq':  self.d_freq.get(),
-            'dark_time':  self.d_time.get(),
-            'opto_duty':  self.o_duty.get(),
-            'opto_freq':  self.o_freq.get(),
-            'opto_len':   self.o_len.get(),
-            'opto_delay': self.o_delay.get(),
+            'baseline_duration': self.baseline_dur.get(),
+            'opto_duration':     self.opto_dur.get(),
+            'reaction_duration': self.reaction_dur.get(),
         }
         if not self.arduino.send_led_data(led_data):
             messagebox.showwarning("Arduino Warning",
@@ -186,7 +163,7 @@ class AddExpModal(BaseModal):
     def create_textbox(self, text):
         ctk.CTkLabel(self, text=text, text_color="#B32442",
                      font=("Arial", 14, "bold")).pack(anchor="w", padx=60)
-        t = ctk.CTkTextbox(self, width=780, height=100, fg_color="white", text_color="black")
+        t = ctk.CTkTextbox(self, width=780, height=80, fg_color="white", text_color="black")
         t.pack(pady=5)
         return t
 
