@@ -43,12 +43,15 @@ AI-and-Fly-Brains/
 python mainwindow.py
 ```
 
-Make sure the Arduino is connected via USB, rig connect to power supply and the camera is connected via 2 of Camera Link (PoCL) before starting an experiment.
+Make sure the Arduino is connected via USB, rig connect to power supply and the camera is connected via 2 of Camera Link (PoCL) before starting an experiment. 
 <p align="center">
 <img width="366" height="258" alt="image" src="https://github.com/user-attachments/assets/8426540f-ad7b-46e4-bdc1-09a17aa2af59" />
 
 </p>
+
 ## Acknowledgements ## 
 
 - **Project Supervisor:** Dr Kevin Webb — Optics & Photonics Research Group, University of Nottingham
 - **Stakeholder:** Dr Isabella Maiellaro — Department of Neuroscience, University of Nottingham
+
+*All other additional files available on Github link with available access only with University of Nottingham account*
