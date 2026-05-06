@@ -5,7 +5,8 @@ This project is a final year individual project at the University of Nottingham,
 <p align="center">
 <img width="444" height="251" alt="image" src="https://github.com/user-attachments/assets/9c5f20ef-eeef-4aec-8070-340ab54253d8" />
 </p>
-## How it works
+
+## How it works ## 
 1. The researcher sets up the experiment in the GUI: entering experiment name, remarks and PWM duration. And click Start Experiment
 2. The software sends a PWM signal to the Arduino to control both the dark-field illumination LEDs and optogenetics LEDs
 3. The Genie Nano CL-M5100 industrial camera starts capturing frames via the SaperaLT SDK
@@ -23,7 +24,7 @@ This project is a final year individual project at the University of Nottingham,
 </p>
 
 
-## Folder Structure
+## Folder Structure ## 
 
 ```
 AI-and-Fly-Brains/
@@ -36,7 +37,7 @@ AI-and-Fly-Brains/
    - arduino_ctrl.py             # Handles serial communication between Python and Arduino
 ```
 
-## Running the software
+## Running the software ## 
 
 ```bash
 python mainwindow.py
@@ -44,9 +45,10 @@ python mainwindow.py
 
 Make sure the Arduino is connected via USB, rig connect to power supply and the camera is connected via 2 of Camera Link (PoCL) before starting an experiment.
 <p align="center">
+<img width="366" height="258" alt="image" src="https://github.com/user-attachments/assets/8426540f-ad7b-46e4-bdc1-09a17aa2af59" />
 
 </p>
-## Acknowledgements
+## Acknowledgements ## 
 
 - **Project Supervisor:** Dr Kevin Webb — Optics & Photonics Research Group, University of Nottingham
 - **Stakeholder:** Dr Isabella Maiellaro — Department of Neuroscience, University of Nottingham
