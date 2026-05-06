@@ -18,7 +18,9 @@ This project is a final year individual project at the University of Nottingham,
 <p align="center">
 <img width="486" height="259" alt="image" src="https://github.com/user-attachments/assets/4d9f68b0-56d0-42d2-9bb1-fd5ef84e349b" />
 </p>
-<img width="200" height="203" alt="image" src="https://github.com/user-attachments/assets/4c273b32-0596-4491-9d9d-00a2298d1774" /> <img width="274" height="199" alt="image" src="https://github.com/user-attachments/assets/066ea858-07a8-4793-b8b5-5e4a9bb10384" />
+<p align="center">
+<img width="433" height="446" alt="image" src="https://github.com/user-attachments/assets/ed300707-666d-47b5-bf16-25b65b59d867" />
+</p>
 
 
 ## Folder Structure
@@ -28,7 +30,6 @@ AI-and-Fly-Brains/
    - AI_datasets_collection/     # Scripts and tools for collecting and preparing annotated datasets
    - AI_training/                # YOLO training scripts
    - ArduinoSerial/              # Arduino sketch for PWM control
-   - CameraTest/ArduinoTestCamExpert   # Test scripts for camera and Arduino integration
    - Icon/                       # UI assets: Background image, sidebar icon
    - mainwindow.py               # Main GUI window: experiment list, search, delete, navigation
    - add_experiment_window.py    # Add new experiment window: settings input, triggers full pipeline
