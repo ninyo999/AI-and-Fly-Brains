@@ -1,33 +1,3 @@
-"""
-track_annotate.py  —  YOLO + BoxMOT (StrongSORT) larval tracker
-================================================================
-Designed for:
-  • 15–30 overlapping larvae per frame
-  • Fixed 1 050-frame sequence at 30 fps (no new larvae mid-sequence)
-  • macOS MPS (Apple Silicon) or CPU fallback
-  • Strict re-ID: re-link lost tracks only within a ≤10-frame gap
-  • 30-frame warm-up: stabilise IDs before locking them
-  • Outputs:
-      tracking_data.csv         – full per-detection log
-      tracking_summary.csv      – per-larva coverage stats
-      validity_check.png        – best-confidence annotated frame
-      dlc_export/               – DeepLabCut-ready labelled-data folder
-        frames/                 – extracted PNGs (one per tracked frame)
-        CollectedData_scorer.csv – DLC multi-index CSV
-        CollectedData_scorer.h5  – DLC HDF5 (same data, faster load)
-
-Usage example (Mac terminal):
-  python /Volumes/SSD512/larval_tracking_yolo/track_annotate.py \
-    --images_dir  /Volumes/SSD512/larval_tracking_yolo/Exp_OPT_CsChr_20 \
-    --model_path  /Volumes/SSD512/larval_tracking_yolo/best.pt \
-    --output_dir  /Volumes/SSD512/larval_tracking_yolo/larval_outputE3 \
-    --device mps \
-    --img_size 640 \
-    --preload_size 1280 \
-    --no_annotated \
-    --no_half \
-    --scorer YourName
-"""
 
 import argparse
 import csv
@@ -51,12 +21,9 @@ try:
 except ImportError:
     sys.exit("pip install ultralytics")
 
-# BoxMOT v17 moved StrongSort to an internal path.
-# We try several known locations across versions so the script works on v10–v17.
 _strongsort_cls = None
 _boxmot_import_error = None
 try:
-    # v17 internal path
     from boxmot.trackers.strongsort.strong_sort import StrongSort as _SS
     _strongsort_cls = _SS
 except ImportError:
@@ -74,7 +41,7 @@ if _strongsort_cls is None:
     try:
         # v12–v16 tracker_zoo path
         from boxmot.trackers.tracker_zoo import create_tracker as _ct
-        _strongsort_cls = None   # we'll use create_tracker instead
+        _strongsort_cls = None   
         _use_create_tracker = True
     except ImportError:
         _boxmot_import_error = True
@@ -82,28 +49,19 @@ if _strongsort_cls is None:
 if _boxmot_import_error:
     sys.exit("Cannot import StrongSort from boxmot. Run: pip install boxmot")
 
-# Determine which instantiation path we have
 _use_create_tracker = _strongsort_cls is None
 if _use_create_tracker:
     from boxmot.trackers.tracker_zoo import create_tracker as _create_tracker   # noqa
 
-# ── Single track colour ────────────────────────────────────────────────────────
-# All detected larvae share one colour so annotations are visually clean.
-# Change this tuple (BGR) to suit your background, e.g.:
-#   cyan   (255, 255, 0)
-#   yellow (0, 255, 255)
-#   white  (255, 255, 255)
-TRACK_COLOUR = (0, 255, 0)   # bright green (BGR)
+
+TRACK_COLOUR = (0, 255, 0) 
 
 WARMUP_FRAMES = 30   # frames used to stabilise initial IDs
-MAX_GAP       = 50   # max frames a track may be absent before we stop re-linking
+MAX_GAP       = 50   # max frames a track may be absent before stop re-linking
 
 
 def get_colour(track_id: int) -> Tuple[int, int, int]:
     return TRACK_COLOUR
-
-
-# ── Image I/O helpers ─────────────────────────────────────────────────────────
 
 def sorted_image_paths(images_dir: str) -> List[Path]:
     exts = {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp"}
@@ -157,7 +115,7 @@ def image_loader_thread(paths: List[Path], resize_to: int, out_queue: queue.Queu
     for path in paths:
         img = fast_load(path, resize_to)
         out_queue.put((path, img))
-    out_queue.put(None)   # sentinel
+    out_queue.put(None)   
 
 
 def copy_to_local(src_paths: List[Path], local_dir: Path) -> List[Path]:
@@ -222,8 +180,7 @@ def build_warmup_map(warmup_detections: List[List[Dict]]) -> Dict[int, int]:
     if n == 0:
         return {}
 
-    # Build affinity matrix: two raw IDs are "same larva" if their median
-    # boxes overlap strongly — helps in a dense overlapping scene.
+    # Build affinity matrix: two raw IDs are same larvae if their median
     affinity = np.zeros((n, n), dtype=float)
     medians = {}
     for rid in raw_ids:
@@ -254,7 +211,7 @@ def build_warmup_map(warmup_detections: List[List[Dict]]) -> Dict[int, int]:
             if i < j and affinity[i, j] > 0.40:
                 union(ri, rj)
 
-    # Assign canonical IDs (1-based, sorted by first-seen order)
+    # Assign IDs
     canonical_map: Dict[int, int] = {}
     root_to_canon: Dict[int, int] = {}
     canon_counter = 1
@@ -271,15 +228,6 @@ def build_warmup_map(warmup_detections: List[List[Dict]]) -> Dict[int, int]:
 # ── Strict gap re-linker ──────────────────────────────────────────────────────
 
 class GapRelinker:
-    """
-    After the warmup phase, if a canonical ID disappears then reappears within
-    MAX_GAP frames, we re-link it.  New raw IDs that appear mid-sequence
-    (impossible by design) are discarded.
-
-    Internally maps  raw_id  →  canonical_id  using the warmup map, then
-    extends it greedily for any new raw IDs produced by the tracker after
-    warmup (tracker may internally reset an ID).
-    """
 
     def __init__(self, canonical_map: Dict[int, int], max_gap: int = MAX_GAP):
         self.canonical_map = dict(canonical_map)  # raw_id -> canonical_id
@@ -295,19 +243,13 @@ class GapRelinker:
 
     def resolve(self, raw_id: int, box: np.ndarray,
                 frame_idx: int) -> Optional[int]:
-        """
-        Returns the canonical ID for this detection, or None if it cannot be
-        matched to any known larva (should never happen in a fixed-count sequence
-        but handles tracker artefacts gracefully).
-        """
-        # Already mapped?
+
         if raw_id in self.canonical_map:
             cid = self.canonical_map[raw_id]
             self.last_seen[cid] = frame_idx
             self.last_box[cid] = box
             return cid
 
-        # New raw ID — try to re-link to a recently-lost canonical ID
         best_cid = None
         best_score = -1.0
         for cid in self.valid_canonical:
@@ -353,22 +295,7 @@ def export_dlc(
     out_dir: Path,
     scorer: str,
 ) -> None:
-    """
-    Produce a DLC-compatible labeled-data folder:
 
-      dlc_export/
-        frames/                  ← PNG copies of every tracked frame
-        CollectedData_<scorer>.csv
-        CollectedData_<scorer>.h5
-
-    Column structure follows DLC's multi-index convention:
-      scorer / individual / bodypart / coords (x, y)
-
-    Each larva is an 'individual'.  The single bodypart is 'centroid'.
-    This is the minimal format DLC needs for multi-animal projects.
-    If you want to refine keypoints, open the project in DLC GUI and
-    use the existing frames + CSV as the starting point.
-    """
     dlc_dir = out_dir / "dlc_export"
     frames_dir = dlc_dir / "frames"
     frames_dir.mkdir(parents=True, exist_ok=True)
@@ -406,8 +333,7 @@ def export_dlc(
         if not dest_path.exists():
             img = fast_load(src_path, 0)  # no resize — DLC needs originals
             if img is not None:
-                # PNG encoder requires 8-bit. Microscope TIFFs are often 16-bit
-                # (dtype uint16). Normalise to 8-bit before saving.
+  
                 if img.dtype != np.uint8:
                     img_min, img_max = img.min(), img.max()
                     if img_max > img_min:
@@ -419,7 +345,6 @@ def export_dlc(
                     tqdm.write(f"  [WARN] Failed to write PNG: {dest_path.name}")
 
         # DLC row index is relative to project labeled-data dir:
-        # "labeled-data/<video_folder>/imgXXXX.png"
         row_index.append(f"labeled-data/frames/{dest_name}")
 
         row = []
@@ -439,11 +364,7 @@ def export_dlc(
 
     df.to_csv(csv_path)
 
-    # Write H5 with graceful fallback.
-    # PyTables older versions cannot serialise a MultiIndex DataFrame in fixed
-    # format — use format="table" which handles it correctly. If that also
-    # fails (e.g. HDF5 library mismatch), skip H5 and warn: DLC can regenerate
-    # it from the CSV with  dlc.convertcsv2h5(config, scorer).
+    # Write H5 with fallback.
     try:
         df.to_hdf(h5_path, key="df_with_missing", mode="w", format="table")
     except Exception as hdf_err:
@@ -508,8 +429,6 @@ def run_pipeline(
     yolo = YOLO(model_path)
 
     # ── MPS image-size safety check ───────────────────────────────────────────
-    # Apple MPS backend crashes silently (0 detections) when YOLO's internal
-    # feature maps exceed 65 536 channels, which happens above ~1280px on MPS.
     MPS_MAX_IMGSZ = 1280
     if device == "mps" and img_size > MPS_MAX_IMGSZ:
         print(f"  [AUTO-FIX] --img_size {img_size} exceeds MPS limit. "
@@ -517,12 +436,6 @@ def run_pipeline(
         img_size = MPS_MAX_IMGSZ
 
     # ── Build StrongSORT tracker ──────────────────────────────────────────────
-    # StrongSORT is best for dense, overlapping, slow-moving objects.
-    # max_age = MAX_GAP so lost tracks stay alive for re-linking.
-    # n_init = 3 means a track must be seen 3× before being confirmed.
-    #
-    # Re-ID model runs on CPU even when YOLO is on MPS — StrongSORT's
-    # osnet weights are not compiled for MPS.
     reid_device = "cpu"   # always CPU for the re-ID backbone on Mac
     reid_weights = Path("osnet_x0_25_msmt17.pt")   # auto-downloaded on first run
 
@@ -633,9 +546,6 @@ def run_pipeline(
             dets_np = np.column_stack([xyxys, confs, clss]).astype(np.float32)
 
         # ── BoxMOT update ─────────────────────────────────────────────────────
-        # BoxMOT v17 signature: tracker.update(dets, img)
-        # Returns array with columns: [x1, y1, x2, y2, track_id, conf, cls, det_idx]
-        # Shape is (N, 8) when tracks exist, (0,) or (0,8) when empty.
         try:
             tracks = tracker.update(dets_np, frame)
         except TypeError:

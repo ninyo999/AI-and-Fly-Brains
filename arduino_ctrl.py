@@ -1,7 +1,6 @@
 import serial
 import serial.tools.list_ports
 
-# Fixed PWM settings — hardcoded in both Python and Arduino
 _PWM_DARK_DUTY  = 60
 _PWM_OPTO_DUTY  = 100
 
@@ -70,7 +69,6 @@ class ArduinoHandler:
             data.get('reaction_duration', _DURATION_DEFAULTS['reaction_duration']),
             'reaction_duration')
 
-        # Message format: baseline,opto_duration,reaction
         fields = [baseline, opto_dur, reaction]
 
         msg = ",".join(str(f) for f in fields) + "\n"

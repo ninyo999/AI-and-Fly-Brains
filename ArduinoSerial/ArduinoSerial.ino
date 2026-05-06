@@ -1,7 +1,6 @@
 const int ledopto      = 5;
 const int leddarkfield = 7;
 
-// Fixed PWM brightness (0-255)
 const int DARK_BRIGHTNESS = 153;  // 60% of 255
 const int OPTO_BRIGHTNESS = 255;  // 100% of 255
 
@@ -25,11 +24,6 @@ void loop() {
   }
 }
 
-// Experiment sequence:
-//  1. Dark field LED on  →  wait baseline duration
-//  2. Opto LED on        →  wait opto duration
-//  3. Opto LED off       →  wait reaction duration
-//  4. Dark field LED off
 void runExperiment(int baseline, int opto_dur, int reaction) {
   // 1. Baseline
   analogWrite(leddarkfield, DARK_BRIGHTNESS);
@@ -47,7 +41,6 @@ void runExperiment(int baseline, int opto_dur, int reaction) {
   analogWrite(leddarkfield, 0);
 }
 
-// Helper: extract the nth comma-separated value from a string
 int getValue(String data, char separator, int index) {
   int found      = 0;
   int strIndex[] = {0, -1};
